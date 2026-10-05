@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>مركز ابتسام | الملخص المالي</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#07111f;--panel:#0d1a2b;--panel2:#101f33;--line:#1d3047;--text:#f4f7fb;--muted:#91a1b5;--blue:#3b82f6;--green:#22c55e;--red:#ef4444;--shadow:0 18px 45px rgba(0,0,0,.25)}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#06101d,#0a1626 55%,#07111f);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Tahoma,Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit}button{cursor:pointer;border:0}.app{max-width:1180px;margin:auto;padding:22px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.logo{width:45px;height:45px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:grid;place-items:center;font-weight:800;font-size:18px;box-shadow:0 8px 25px #2563eb33}.brand h1{font-size:18px;margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:12px}.actions{display:flex;gap:9px}.ghost,.primary{padding:11px 15px;border-radius:12px}.ghost{background:#102137;color:#cbd5e1;border:1px solid var(--line)}.primary{background:var(--blue);color:white;box-shadow:0 10px 25px #2563eb33}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin:10px 0 16px}.toolbar h2{font-size:25px;margin:0}.month{background:var(--panel);border:1px solid var(--line);color:white;border-radius:12px;padding:10px 13px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:linear-gradient(160deg,#0e1c2e,#0b1727);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow)}.label{color:var(--muted);font-size:13px}.amount{font-size:29px;font-weight:800;margin-top:9px}.income .amount{color:#5ee78a}.expense .amount{color:#ff7777}.remain .amount{color:#6ca8ff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.section{background:linear-gradient(160deg,#0e1c2e,#0b1727);border:1px solid var(--line);border-radius:18px;padding:19px}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.section h3{margin:0;font-size:17px}.add{background:#142943;color:#7eb0ff;border:1px solid #21456e;border-radius:10px;padding:8px 12px}.rows{display:flex;flex-direction:column;gap:9px}.row{display:flex;justify-content:space-between;align-items:center;background:#0a1626;border:1px solid #172a40;padding:12px 13px;border-radius:12px}.cat{font-size:14px}.val{font-weight:700}.income .val{color:#7bf0a0}.expense .val{color:#ff8585}.empty{color:var(--muted);text-align:center;padding:22px 5px}.bottom{margin-top:14px}.bar-wrap{height:12px;background:#132338;border-radius:99px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);border-radius:99px}.footnote{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:8px}
+.auth{min-height:100vh;display:grid;place-items:center;padding:22px}.authbox{width:min(430px,100%);background:#0d1a2b;border:1px solid var(--line);border-radius:22px;padding:25px;box-shadow:var(--shadow)}.authbox h2{margin:0 0 7px}.authbox p{color:var(--muted);font-size:13px}.field{display:block;margin:12px 0}.field span{display:block;color:#b8c5d6;font-size:12px;margin-bottom:6px}.field input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#091525;color:white;outline:none}.msg{color:#ff9b9b;font-size:12px;min-height:18px;margin:8px 0}.setup{background:#091525;border:1px dashed #315070;border-radius:14px;padding:12px;margin:15px 0;color:#a9bad0;font-size:12px;line-height:1.6}
+.modal{position:fixed;inset:0;background:#0009;display:none;align-items:end;justify-content:center;padding:14px;z-index:10}.modal.show{display:flex}.sheet{width:min(520px,100%);background:#0d1a2b;border:1px solid var(--line);border-radius:20px;padding:20px}.sheet h3{margin-top:0}.sheet input,.sheet select{width:100%;background:#091525;color:white;border:1px solid var(--line);border-radius:12px;padding:13px;margin:7px 0 12px}.modal-actions{display:flex;gap:8px}.modal-actions button{flex:1}
+@media(max-width:760px){.app{padding:15px}.cards{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.toolbar{align-items:flex-start;gap:10px;flex-direction:column}.toolbar h2{font-size:22px}.actions .ghost{display:none}.top{margin-bottom:17px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="modal" class="modal">
+ <div class="sheet">
+  <h3 id="modalTitle">إضافة حركة مالية</h3>
+  <label class="field"><span>النوع</span><select id="mType"><option value="income">دخل</option><option value="expense">مصروف</option></select></label>
+  <label class="field"><span>التصنيف</span><input id="mCategory" placeholder="مثال: اشتراكات الأطفال"></label>
+  <label class="field"><span>المبلغ</span><input id="mAmount" type="number" inputmode="decimal" placeholder="0"></label>
+  <div class="modal-actions"><button class="ghost" onclick="closeModal()">إلغاء</button><button class="primary" onclick="saveEntry()">حفظ</button></div>
+  <div id="mMsg" class="msg"></div>
+ </div>
+</div>
+<script>
+const SUPABASE_URL = "https://dwifylcibtawffniyzmu.supabase.co";
+let SUPABASE_KEY = localStorage.getItem("ibtisam_supabase_key") || "";
+let sb=null, user=null, entries=[], editId=null;
+const $=id=>document.getElementById(id);
+function money(n){return Number(n||0).toLocaleString('ar-SA',{maximumFractionDigits:2})+" ر.س"}
+function monthValue(){return $('month').value}
+function monthLabel(v){return new Date(v+"T00:00:00").toLocaleDateString('ar-SA',{month:'long',year:'numeric'})}
+function appShell(){
+ $('root').innerHTML=`<div class="app">
+  <div class="top"><div class="brand"><div class="logo">إ</div><div><h1>مركز ابتسام لرياض الأطفال</h1><p>الإدارة المالية</p></div></div><div class="actions"><button class="ghost" onclick="logout()">خروج</button></div></div>
+  <div class="toolbar"><h2>الملخص المالي</h2><input class="month" id="month" type="month" value="${new Date().toISOString().slice(0,7)}" onchange="loadEntries()"></div>
+  <div class="cards">
+   <div class="card income"><div class="label">إجمالي الدخل</div><div class="amount" id="totalIncome">0 ر.س</div></div>
+   <div class="card expense"><div class="label">إجمالي المصروفات</div><div class="amount" id="totalExpense">0 ر.س</div></div>
+   <div class="card remain"><div class="label">المتبقي</div><div class="amount" id="remaining">0 ر.س</div></div>
+  </div>
+  <div class="grid">
+   <div class="section"><div class="section-head"><h3>الدخل</h3><button class="add" onclick="openModal('income')">+ إضافة دخل</button></div><div id="incomeRows" class="rows"></div></div>
+   <div class="section"><div class="section-head"><h3>المصروفات</h3><button class="add" onclick="openModal('expense')">+ إضافة مصروف</button></div><div id="expenseRows" class="rows"></div></div>
+  </div>
+  <div class="section bottom"><div class="section-head"><h3>توزيع المصروفات</h3></div><div class="bar-wrap"><div id="bar" class="bar" style="width:0%"></div></div><div class="footnote"><span>الدخل</span><span id="ratio">0%</span><span>المصروفات</span></div></div>
+ </div>`;
+}
+function loginShell(msg=''){
+ $('root').innerHTML=`<div class="auth"><div class="authbox"><div class="logo">إ</div><h2>الإدارة المالية</h2><p>مركز ابتسام لرياض الأطفال</p>
+ <div class="setup">أدخل <b>Publishable key</b> من Supabase مرة واحدة فقط على هذا الجهاز. لا تدخل Secret key أو Service Role key.</div>
+ <label class="field"><span>البريد الإلكتروني</span><input id="email" type="email" autocomplete="email" placeholder="name@example.com"></label>
+ <label class="field"><span>كلمة المرور</span><input id="password" type="password" autocomplete="current-password" placeholder="••••••••"></label>
+ <div class="msg">${msg}</div><button class="primary" style="width:100%" onclick="signIn()">تسجيل الدخول</button>
+ <button class="ghost" style="width:100%;margin-top:8px" onclick="signUp()">إنشاء حساب جديد</button>
+ </div></div>`;
+}
+function keyShell(msg=''){
+ $('root').innerHTML=`<div class="auth"><div class="authbox"><div class="logo">إ</div><h2>ربط النظام</h2><p>أدخل Publishable key من Supabase مرة واحدة على هذا الجهاز.</p>
+ <div class="setup">المفتاح المطلوب هو <b>Publishable key</b> فقط. لا تستخدم Secret key أو Service Role.</div>
+ <label class="field"><span>Publishable key</span><input id="apiKey" type="text" autocomplete="off" placeholder="sb_publishable_..."></label>
+ <div class="msg">${msg}</div><button class="primary" style="width:100%" onclick="saveKey()">حفظ وربط</button>
+ </div></div>`;
+}
+async function saveKey(){
+ const k=$('apiKey').value.trim();
+ if(!k){$('root').querySelector('.msg').textContent='ألصق Publishable key أولاً';return}
+ localStorage.setItem('ibtisam_supabase_key',k); SUPABASE_KEY=k; await init();
+}
+async function init(){
+ if(!SUPABASE_KEY){keyShell();return}
+ sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+ const {data,error}=await sb.auth.getUser();
+ if(error && /apikey|key/i.test(error.message||'')){localStorage.removeItem('ibtisam_supabase_key');SUPABASE_KEY='';keyShell('المفتاح غير صحيح. تأكد أنه Publishable key.');return}
+ user=data.user;
+ if(user){appShell();await loadEntries()}else loginShell();
+ sb.auth.onAuthStateChange((_e,s)=>{user=s?.user||null;if(user){appShell();loadEntries()}});
+}
+async function signIn(){const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error) loginShell(error.message)}
+async function signUp(){const {error}=await sb.auth.signUp({email:$('email').value.trim(),password:$('password').value});if(error) loginShell(error.message);else loginShell('تم إنشاء الحساب. إذا طُلب تأكيد البريد، أكّد بريدك ثم سجّل الدخول.')}
+async function logout(){await sb.auth.signOut();loginShell()}
+async function loadEntries(){
+ const ym=monthValue(); const first=ym+"-01"; const d=new Date(first+"T00:00:00");d.setMonth(d.getMonth()+1);const next=d.toISOString().slice(0,10);
+ const {data,error}=await sb.from('financial_entries').select('*').gte('month',first).lt('month',next).order('created_at');
+ if(error){alert(error.message);return} entries=data||[];render();
+}
+function render(){
+ const inc=entries.filter(x=>x.type==='income'), exp=entries.filter(x=>x.type==='expense');
+ const ti=inc.reduce((s,x)=>s+Number(x.amount),0), te=exp.reduce((s,x)=>s+Number(x.amount),0);
+ $('totalIncome').textContent=money(ti);$('totalExpense').textContent=money(te);$('remaining').textContent=money(ti-te);
+ $('incomeRows').innerHTML=inc.length?inc.map(row).join(''):'<div class="empty">لا توجد بيانات دخل لهذا الشهر</div>';
+ $('expenseRows').innerHTML=exp.length?exp.map(row).join(''):'<div class="empty">لا توجد مصروفات لهذا الشهر</div>';
+ const p=ti?Math.min(100,(te/ti)*100):0;$('bar').style.width=p+'%';$('ratio').textContent=Math.round(p)+'%';
+}
+function row(x){return `<div class="row"><span class="cat">${escapeHtml(x.category)}</span><span class="val">${money(x.amount)}</span></div>`}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function openModal(type){editId=null;$('mType').value=type;$('mCategory').value='';$('mAmount').value='';$('mMsg').textContent='';$('modal').classList.add('show')}
+function closeModal(){$('modal').classList.remove('show')}
+async function saveEntry(){
+ const category=$('mCategory').value.trim(), amount=Number($('mAmount').value), type=$('mType').value;
+ if(!category||!amount||amount<0){$('mMsg').textContent='أدخل التصنيف والمبلغ بشكل صحيح';return}
+ const first=monthValue()+"-01";
+ const {error}=await sb.from('financial_entries').insert({month:first,type,category,amount});
+ if(error){$('mMsg').textContent=error.message;return}
+ closeModal();await loadEntries();
+}
+init();
+</script>
+</body>
+</html>
